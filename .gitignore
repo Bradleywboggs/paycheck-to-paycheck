@@ -1,3 +1,4 @@
 *.hi
 *.ho
 *.db
+.stack-work/
