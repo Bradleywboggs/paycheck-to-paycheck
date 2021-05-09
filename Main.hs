@@ -2,7 +2,7 @@ module Main where
 
 import Bill
 import Data.List (foldl')
-
+import Data.Time
 -- TODO: fetch ACTUAL banking Data
 --   - SPIKE to figure out an API to get the data
 --   - implement the API request service
@@ -32,15 +32,22 @@ currentBalance = 2035.67
 currentDate :: Date
 currentDate = 5
 
-nextPayDay :: Date -> Date
-nextPayDay currentDate 
-    | currentDate < 15 = 15
-    | otherwise        = 30
+nextPayDay paydays currentDate 
+    | currentDate < fst paydays = fst paydays
+    | otherwise                 = snd paydays
 
+getPayDays year month 
+    | month `elem` [1,3,5,7,8,10,12] = (15, 31)
+    | month == 2 && isLeapYear year  = (15, 29)
+    | month == 2                     = (15, 28)
+    | otherwise                      = (15, 30)
 
 main :: IO ()
 main = do 
-    let unpaidBeforeNextPayDay = filter (\bill -> getPaymentDate bill < nextPayDay currentDate) (getUnpaidBills bills)
+    (year, month, currentDate) <- toGregorian . utctDay <$> getCurrentTime
+    let paydays = getPayDays year month
+    print paydays
+    let unpaidBeforeNextPayDay = filter (\bill -> getPaymentDate bill < nextPayDay paydays currentDate) (getUnpaidBills bills)
     let totalOwed = sum $ getPaymentAmount <$> unpaidBeforeNextPayDay
     putStrLn "-----------Your current balance-----------" 
     print currentBalance
