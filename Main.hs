@@ -15,7 +15,6 @@ import Data.Time
 --    - set up "Repository" service to fetch and write data to the db
 -- TODO: design and build an actual interface
 --     - could be a TUI for now? Maybe use Elm to create a simple front end?
--- TODO: incorporate real datetime stuff
 
 bills :: [Bill]
 bills = 
@@ -46,7 +45,6 @@ main :: IO ()
 main = do 
     (year, month, currentDate) <- toGregorian . utctDay <$> getCurrentTime
     let paydays = getPayDays year month
-    print paydays
     let unpaidBeforeNextPayDay = filter (\bill -> getPaymentDate bill < nextPayDay paydays currentDate) (getUnpaidBills bills)
     let totalOwed = sum $ getPaymentAmount <$> unpaidBeforeNextPayDay
     putStrLn "-----------Your current balance-----------" 
